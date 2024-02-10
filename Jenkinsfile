@@ -1,40 +1,40 @@
 pipeline {
-    agent any
-
+    agent { label "dev-server"}
+    
     stages {
-        stage ('SCM') {
-            steps {
-                git branch: 'main', url: 'https://AMOL5458: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@github.com/AMOL5458/CDAC_Final_Project.git'
+        
+        stage("code"){
+            steps{
+                git url: "https://github.com/AMOL5458/CDAC_Final_Project.git", branch: "main"
+                echo 'bhaiyya code clone ho gaya'
             }
         }
-        stage ('docker login') {
-            steps {
-                sh 'echo dckr_pat_eb50QN1ET0dttnW72gnqc9eNtxw | /usr/bin/docker login -u amol1701 --password-stdin'
+        stage("build and test"){
+            steps{
+                sh "docker build -t CDAC_Final_Project-new ."
+                echo 'code build bhi ho gaya'
             }
         }
-        stage ('docker build image') {
-    steps {
-        script {
-            // Use 'docker' instead of an absolute path
-            sh 'docker image build -t AMOL5458/mywebsite .'
+        stage("scan image"){
+            steps{
+                echo 'image scanning ho gayi'
+            }
+        }
+        stage("push"){
+            steps{
+                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
+                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                sh "docker tag node-app-test-new:latest ${env.dockerHubUser}/node-app-test-new:latest"
+                sh "docker push ${env.dockerHubUser}/node-app-test-new:latest"
+                echo 'image push ho gaya'
+                }
+            }
+        }
+        stage("deploy"){
+            steps{
+                sh "docker-compose down && docker-compose up -d"
+                echo 'deployment ho gayi'
+            }
         }
     }
 }
-
-        stage ('docker push image') {
-            steps {
-                sh '/usr/bin/docker image push AMOL5458/mywebsite'
-            }
-        }
-        stage ('docker remove service') {
-            steps {
-                sh '/usr/bin/docker service rm myservice'
-            }
-        }
-        stage ('docker create service') {
-            steps {
-                sh '/usr/bin/docker service create --replicas 5 --name myservice -p 9091:80 AMOL5458/myhttpd'
-            }
-        }
-    }
-}    
