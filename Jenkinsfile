@@ -13,10 +13,14 @@ pipeline {
             }
         }
         stage ('docker build image') {
-            steps {
-                sh '/usr/bin/docker image build -t AMOL5458/mywebsite .'
-            }
+    steps {
+        script {
+            // Use 'docker' instead of an absolute path
+            sh 'docker image build -t AMOL5458/mywebsite .'
         }
+    }
+}
+
         stage ('docker push image') {
             steps {
                 sh '/usr/bin/docker image push AMOL5458/mywebsite'
