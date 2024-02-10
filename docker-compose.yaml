@@ -1,0 +1,7 @@
+version: '3.9'
+
+services:
+  web:
+    image: "trainwithamol/CDAC_Final_Project-new:latest"
+    ports:
+      - "8000:8000"
